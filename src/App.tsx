@@ -1,6 +1,5 @@
 import React from 'react';
 import './App.css';
-import metamaskIcon from './metamask.svg';
 import Web3 from 'web3';
 declare global {
   interface Window {
