@@ -3,10 +3,20 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { Web3ReactProvider } from '@web3-react/core';
+import { ethers } from 'ethers';
+const POLLING_INTERVAL = 12000;
 
+const getLibrary = (provider: any) => {
+  const library = new ethers.providers.Web3Provider(provider);
+  library.pollingInterval = POLLING_INTERVAL;
+  return library;
+};
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <Web3ReactProvider getLibrary={getLibrary}>
+      <App />
+    </Web3ReactProvider>
   </React.StrictMode>,
   document.getElementById('root')
 );
