@@ -1,0 +1,42 @@
+.meta-connect,.wallet-connect{
+    color: #FFFFFF;
+    cursor: pointer;
+    height: 44px;
+    display: flex;
+    font-size: 14px;
+    background: linear-gradient(
+    284.51deg, #163267 -19.41%, #449BC5 111.91%);
+    align-items: center;
+    font-weight: 500;
+    line-height: 20px;
+    padding-left: 16px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    padding-right: 16px;
+    justify-content: space-between; 
+}
+.btn-connect{
+    color: white;
+    border: 1px solid rgb(113, 206, 243);
+    position: relative;
+    width: 200px;
+    font-size: 21px;
+    padding: 0 5px 5px 5px;
+    cursor: pointer;
+}
+.btn-close {
+    position: absolute;
+    right: 0;
+    top: -3px;
+    font-size: 14px !important;
+    cursor: pointer;
+    color: #fff;
+}
+.MuiDialog-paperFullWidth{
+    padding: 20px 20px 0 20px;
+    background: #1B1938 !important;
+    border-radius: 5px;
+}
+.flex.items-center {
+    width: 100%;
+}

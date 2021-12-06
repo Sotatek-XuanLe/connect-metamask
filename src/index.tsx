@@ -5,12 +5,22 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import store from './store'
 import { Provider } from 'react-redux'
+import { Web3ReactProvider } from '@web3-react/core';
+import { ethers } from 'ethers';
+const POLLING_INTERVAL = 12000;
 
+const getLibrary = (provider: any) => {
+  const library = new ethers.providers.Web3Provider(provider);
+  library.pollingInterval = POLLING_INTERVAL;
+  return library;
+};
 ReactDOM.render(
   <React.StrictMode>
-    <Provider store={store}>
-      <App />
-    </Provider>
+    <Web3ReactProvider getLibrary={getLibrary}>
+      <Provider store={store}>
+        <App />
+      </Provider>
+    </Web3ReactProvider>
   </React.StrictMode>,
   document.getElementById('root')
 );
