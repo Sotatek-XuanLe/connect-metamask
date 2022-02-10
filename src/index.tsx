@@ -6,8 +6,9 @@ import reportWebVitals from './reportWebVitals';
 import store from '../src/store/store';
 import { Provider } from 'react-redux'
 import { Web3ReactProvider } from '@web3-react/core';
-import { ethers } from 'ethers';
+import i18n from "./components/i18n";
 import Web3 from "web3";
+import { I18nextProvider } from "react-i18next";
 const POLLING_INTERVAL = 12000;
 // const getLibrary = (provider: any) => {
 //   const library = new ethers.providers.Web3Provider(provider);
@@ -19,11 +20,13 @@ function getLibrary(provider: any) {
 }
 ReactDOM.render(
   <React.StrictMode>
-    <Web3ReactProvider getLibrary={getLibrary}>
-      <Provider store={store}>
-        <App />
-      </Provider>
-    </Web3ReactProvider>
+    <I18nextProvider i18n={i18n}>
+      <Web3ReactProvider getLibrary={getLibrary}>
+        <Provider store={store}>
+          <App />
+        </Provider>
+      </Web3ReactProvider>
+    </I18nextProvider>
   </React.StrictMode>,
   document.getElementById('root')
 );

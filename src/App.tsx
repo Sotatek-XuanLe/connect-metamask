@@ -8,15 +8,20 @@ import Option from './base/Option/Option';
 import ReactGA from 'react-ga';
 import { WalletConnectConnector } from '@web3-react/walletconnect-connector';
 import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core';
-import { Dialog, IconButton, makeStyles } from '@material-ui/core';
+import { Dialog } from '@material-ui/core';
 import './style/app.scss';
 import CloseIcon from '@material-ui/icons/Close';
 import { setCurrentUser, setCoinUser } from './redux/user';
 import { getLocalStorage, removeLocalStorage, setOneLocalStorage } from './config/storage';
-import { useAppDispatch } from './store/hook';
+import { useAppDispatch, useBoolean, useCoin } from './store/hook';
 import Cookies from 'js-cookie'
-import web3 from './config/walletConnect';
+import web3, { isConnectedByWalletConnect, walletconnect, walletconnectProvider } from './config/walletConnect';
 import styled from "styled-components";
+import i18n from './components/i18n';
+import { useTranslation } from "react-i18next";
+import LanguageSwitch from './components/LanguageSwitch';
+import { getShortAddress } from './helper/funcition';
+import { validationMaxDecimalsNoRound } from './helper/bignumber';
 // ReactGA.initialize('UA-xxxxxxxxx-x');
 
 declare global {
@@ -81,16 +86,19 @@ export default function App({
   setPendingError?: (error: boolean) => void
 }) {
   const COOKIES_ADDRESS = 'address';
-  const { activate } = useWeb3React();
-  const [address, setAddress] = React.useState('');
+  const locale = getLocalStorage("locale");
+  const { t } = useTranslation();
+  // const { account,activate } = useWeb3React();
+  let { account, activate, deactivate } = useWeb3React<Web3>();
+  const [, setAddress] = React.useState('');
   const [openModal, setOpenModal] = useState<boolean>(false);
   const setModal = () => {
     setOpenModal(false)
   }
+  const ethCoin: any = useCoin();
   const dispatch = useAppDispatch();
   const addressUser: any = getLocalStorage(COOKIES_ADDRESS);
-  console.log(addressUser, 'addressUser');
-
+  const [isLoading, setLoading, unsetLoading] = useBoolean();
   const tryActivation = useCallback(
     async (
       connector:
@@ -108,7 +116,6 @@ export default function App({
         }
         return true;
       });
-      console.log(1);
       setOpenModal(false)
       // log selected wallet
       ReactGA.event({
@@ -116,8 +123,6 @@ export default function App({
         action: "Change Wallet",
         label: name,
       });
-      console.log(2);
-
       /**
        *
        * if the connector is walletconnect
@@ -134,20 +139,39 @@ export default function App({
       conn &&
         activate(conn, undefined, true).catch((error: any) => {
           console.log(error, 'err');
+          console.log(33333);
+
           if (error instanceof UnsupportedChainIdError) {
             activate(conn);
-            console.log(2);
-
             // a little janky...can't use setError because the connector isn't set
           } else {
+            console.log(4444444444444444);
 
           }
         });
-      console.log(3);
+      console.log(555555555);
 
     },
     [activate]
   );
+  const connect = async () => {
+    setLoading();
+    try {
+      if (walletconnect && walletconnect.walletConnectProvider) {
+        walletconnect.walletConnectProvider = undefined;
+      }
+      await activate(walletconnect, undefined, false);
+      if (isConnectedByWalletConnect()) {
+        window.location.reload();
+      }
+    } catch (error) {
+      alert("Some thing went wrong!");
+    } finally {
+      setOpenModal(false);
+      unsetLoading();
+    }
+  };
+
   // Get WalletConnect supported option
   const getOptions = useMemo(() => {
     return Object.keys(SUPPORTED_WALLETS).map((key) => {
@@ -160,8 +184,8 @@ export default function App({
             onClick={() => {
               console.log(option, 'option');
 
-              tryActivation(option.connector);
-
+              // tryActivation(option.connector);
+              connect();
             }}
             key={key}
             active={option.connector === connector}
@@ -184,6 +208,7 @@ export default function App({
       setAddress("");
       return;
     }
+    setLoading();
     window.web3 = new Web3(window.ethereum);
     try {
       const accounts = await window.ethereum.request({
@@ -200,47 +225,80 @@ export default function App({
         dispatch(setCurrentUser(payload.username));
       };
       setOpenModal(false);
+      unsetLoading();
     } catch (err: any) {
       setAddress("");
+      unsetLoading();
     }
   };
-  const handleLogOut = () => {
+  const handleLogOut = useCallback(async (type: any) => {
+    console.log('click logout');
+    if (isConnectedByWalletConnect()) {
+      try {
+        walletconnectProvider.disconnect().then((data:any) => {
+          deactivate();
+        })
+      } catch (error) {
+        console.error("Exception " + error);
+        dispatch(setCurrentUser(''));
+        removeLocalStorage("address");
+        removeLocalStorage("walletconnect");
+        removeLocalStorage("coin");
+        dispatch(setCoinUser('0'));
+        unsetLoading();
+      }
+    }
+    dispatch(setCurrentUser(''));
     removeLocalStorage("address");
-    setAddress("");
-  }
+    removeLocalStorage("walletconnect");
+    removeLocalStorage("coin");
+    dispatch(setCoinUser('0'));
+    unsetLoading();
+
+  }, [addressUser]);
   const getCoin = useCallback(
     async (adr: string) => {
       try {
         if (adr) {
-          console.log('adr',adr);
+          setLoading();
           if (web3) {
-            console.log(web3,'web3');
-            
             await web3.eth.getBalance(adr)
               .then((result: any) => {
-                console.log(123, result);
                 if (result) {
-                  console.log(456, result);
-  
                   dispatch(setCoinUser(result));
+                  unsetLoading();
                 }
               }).catch((err: any) => {
-                console.log(345,err);
-                
+                console.log(err);
+                unsetLoading();
               })
           }
         }
       }
-      catch{
-
+      catch (err) {
+        console.log(err);
       }
-
     },
-    []
+    [dispatch]
   );
-  const getAddressFromCookies = (): string | undefined => {
-    return Cookies.get(COOKIES_ADDRESS) ?? ""
+  // get address
+  const getAddressFromLocalStorage = (): string | undefined => {
+    return getLocalStorage(COOKIES_ADDRESS) ?? ""
   }
+  // login with walletconnect
+  useEffect(() => {
+    if (account) {
+      console.log(account,'acc');
+      
+      // setOneLocalStorage(COOKIES_ADDRESS, account);
+      dispatch(setCurrentUser(account));
+    }
+    console.log(1);
+  }, [account]);
+  console.log(2, account);
+  console.log(3, addressUser);
+
+  // change acc, change network
   useEffect(() => {
     (async () => {
       if (window.ethereum) {
@@ -249,12 +307,10 @@ export default function App({
           // check change account get eth coin
           if (accounts.length > 0) {
             if (accounts) {
-              console.log(accounts, 'acc');
               getCoin(accounts[0]);
             }
             dispatch(setCurrentUser(accounts[0]));
           } else {
-            console.log("Clear user data 3");
             dispatch(setCurrentUser(""));
           }
         });
@@ -262,7 +318,7 @@ export default function App({
         // Handle network change
         window.ethereum.on("chainChanged", async (idNetWork_hex: any) => {
           let idNetWork = parseInt(idNetWork_hex, 16)
-          let address = getAddressFromCookies();
+          let address = getAddressFromLocalStorage();
           if (idNetWork) {
             if (idNetWork === parseInt("4")) {
               if (address) {
@@ -272,7 +328,7 @@ export default function App({
               }
             } else {
               // Logout current user;
-
+              console.log('log out');
             }
           }
         });
@@ -282,29 +338,51 @@ export default function App({
 
       // Check if the user logout of metamask
     })();
-  }, []);
+  }, [getCoin, dispatch]);
+  // get coin
   useEffect(() => {
-    console.log(addressUser, 'addressUser');
-    console.log(getCoin(addressUser),'coin');
-   
     addressUser ? getCoin(addressUser) : dispatch(setCurrentUser(""));
   }, [addressUser, dispatch, getCoin]);
-  const x : any= getCoin(addressUser).then((r:any)=>{
-    console.log(r,'rrrrrrrrrr');
-  });
-  console.log(x,'x');
-  
+
+  // change language
+  useEffect(() => {
+    if (locale) {
+      i18n.changeLanguage(locale);
+    }
+  }, [locale]);
   return (
     <div className="App">
       <header className="App-header">
-        {!address &&
-          <div onClick={handleClickModal} className='meta-mask'>
-            <span className={'btn-connect'}>Connect to wallet</span>
-          </div>
-        }
-        {address && <div>Address: {address}</div>}
-        {address && <button onClick={handleLogOut}>Logout</button>}
+        <SDivConnectHeader>
+          <SDivHeader>
+            {
+              !!isLoading ? <SDivLoader />
+                :
+                addressUser && addressUser !== '' ?
+                  <SDivConnect>
+                    <SAddress>Address:{getShortAddress(addressUser)}</SAddress>
+                    {
+                      ethCoin && ethCoin > 0 ?
+                        <SCoin>{validationMaxDecimalsNoRound(ethCoin,3)} ETH</SCoin>
+                        :
+                        <SCoin>0 ETH</SCoin>
+                    }
+                    <SDivLogout onClick={handleLogOut}>Logout</SDivLogout>
+                  </SDivConnect>
+                  :
+                  <>
+                    <SBtnConnect onClick={handleClickModal}>
+
+                      {t('Connect to wallet')}
+                    </SBtnConnect>
+                  </>
+            }
+
+            <LanguageSwitch />
+          </SDivHeader>
+        </SDivConnectHeader>
       </header>
+
       <Dialog
         open={openModal}
         onClose={setOpenModal}
@@ -315,18 +393,107 @@ export default function App({
         <div className={'btn-close'} onClick={setModal}>
           <CloseIcon />
         </div>
-        <SBtnConnect onClick={handleConnectMetaMask}>
+        <SBtnConnectPopup onClick={handleConnectMetaMask}>
           <span>Connect to metamask </span>
-        </SBtnConnect>
-        <div className='wallet-connect'>{getOptions}</div>
+        </SBtnConnectPopup>
+        <SBtnConnectPopup>{getOptions}</SBtnConnectPopup>
       </Dialog>
-    </div>
+    </div >
   );
 }
+const SDivConnectHeader = styled.div`
+    width: 100%;
+    position: fixed;
+    top: 0; 
+`
+const SDivHeader = styled.div`
+    width:100%;
+    background:#0c0b19;
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    padding:5px;
+
+`
+const SDivConnect = styled.div`
+    padding: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #131421;
+    border-radius: 50px;
+    color: #bfbfbf;
+`
+const SDivLogout = styled.div`
+  background: #262a47 !important;
+  padding: 10px;
+  border-radius: 50px;
+  font-weight: 400;
+  color: #fff;
+  cursor:pointer;
+  font-size:14px;
+  margin-right:10px;
+`
 const SBtnConnect = styled.div`
-  font-size: 18px !important;
+    font-size: 18px !important;
     line-height: 27px;
     color: #fff !important;
-    padding: 15px;
+    padding: 10px;
     border-radius: 50px !important;
+    background-color: rgba(76,255,163,0.2);
+    width: 190px;
+    cursor:pointer;
+    @media screen and (max-width: 767px) {
+      width:30%;
+    }
 `
+const SBtnConnectPopup = styled.div`
+  color: #ffffff;
+    opacity: 0.7;
+    cursor: pointer;
+    height: 56px;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    font-size: 14px;
+    background: rgba(23,26,46,1);
+    border: 1px solid rgba(23,26,46,1);
+    -webkit-align-items: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    font-weight: 500;
+    line-height: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    padding: 0 15px;
+    -webkit-box-pack: justify;
+    -webkit-justify-content: space-between;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+`
+const SAddress = styled.div`
+    font-size:14px;
+`
+const SCoin = styled.div`
+    font-size:14px;
+    margin-left:10px;
+`
+const SDivLoader = styled.div`
+  border: 2px solid #02d394;
+  border-radius: 50%;
+  border-top: 2px solid #333;
+  width: 20px;
+  height: 20px;
+  -webkit-animation: spin 2s linear infinite; /* Safari */
+  animation: spin 2s linear infinite;
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+`;

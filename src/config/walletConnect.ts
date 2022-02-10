@@ -18,10 +18,10 @@ const ETHERIUM_MAINEST = {
   chainId: "1",
   name: "Mainnet",
 };
-const RINKEBY_TESTNEST = {
-  chainId: "4",
-  name: "Rinkeby",
-};
+// const RINKEBY_TESTNEST = {
+//   chainId: "4",
+//   name: "Rinkeby",
+// };
 //Create WalletConnect Provider
 const RPC_DEFAULT = "https://bridge.walletconnect.org";
 export const resetWalletConnector = (connector: AbstractConnector) => {
@@ -142,11 +142,11 @@ export const reInitWeb3 = () => {
     if (address) {
       web3 = new Web3(window.ethereum) || "https://data-seed-prebsc-1-s1.binance.org:8545/";
     } else {
-      let infura = NETWORK_DEFAULT == ETHERIUM_MAINEST.chainId ? INFURA_MAIN_NET : INFURA_TEST_NET
+      let infura = NETWORK_DEFAULT === ETHERIUM_MAINEST.chainId ? INFURA_MAIN_NET : INFURA_TEST_NET
       web3 = new Web3(infura)
     }
   } else {
-    let infura = NETWORK_DEFAULT == ETHERIUM_MAINEST.chainId ? INFURA_MAIN_NET : INFURA_TEST_NET
+    let infura = NETWORK_DEFAULT === ETHERIUM_MAINEST.chainId ? INFURA_MAIN_NET : INFURA_TEST_NET
     web3 = new Web3(infura)
   }
 
