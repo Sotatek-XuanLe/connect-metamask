@@ -8,16 +8,20 @@ const resources = {
   vn: {
     translation: {
       "Connect to wallet": "Kết nối với ví ",
+      "Disconnect":"Ngắt kết nối"
     },
   },
   en: {
     translation: {
-      "Connect to wallet":"Connect to wallet"
+      "Connect to wallet":"Connect to wallet",
+      "Disconnect":"Disconnect"
     },
   },
   ko: {
     translation: {
       "Connect to wallet": "지갑 연결",
+      "Disconnect":"연결 끊기"
+
     },
   },
 };

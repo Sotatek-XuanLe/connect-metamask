@@ -62,7 +62,6 @@ export const injected = new InjectedConnector({
 
 export const getSignature = (address: string): any => {
   let web3: any;
-  console.log(address, "address");
   const _message = `Sign this message to login with address ${address}`;
   if (web3) {
     return new Promise<any>((resolve: (value: string) => void, reject) => {
@@ -88,7 +87,6 @@ export default function App({
   const COOKIES_ADDRESS = 'address';
   const locale = getLocalStorage("locale");
   const { t } = useTranslation();
-  // const { account,activate } = useWeb3React();
   let { account, activate, deactivate } = useWeb3React<Web3>();
   const [, setAddress] = React.useState('');
   const [openModal, setOpenModal] = useState<boolean>(false);
@@ -138,19 +136,13 @@ export default function App({
       }
       conn &&
         activate(conn, undefined, true).catch((error: any) => {
-          console.log(error, 'err');
-          console.log(33333);
-
           if (error instanceof UnsupportedChainIdError) {
             activate(conn);
             // a little janky...can't use setError because the connector isn't set
           } else {
-            console.log(4444444444444444);
-
+          console.log('err');
           }
         });
-      console.log(555555555);
-
     },
     [activate]
   );
@@ -160,7 +152,15 @@ export default function App({
       if (walletconnect && walletconnect.walletConnectProvider) {
         walletconnect.walletConnectProvider = undefined;
       }
-      await activate(walletconnect, undefined, false);
+      await activate(walletconnect, undefined, false).then((result:any)=>{
+        console.log(result,'result');
+      }).
+      catch((error:any)=>{
+        console.log('error',error);
+      })
+      .finally(()=>{
+        console.log('done');
+      })
       if (isConnectedByWalletConnect()) {
         window.location.reload();
       }
@@ -235,7 +235,8 @@ export default function App({
     console.log('click logout');
     if (isConnectedByWalletConnect()) {
       try {
-        walletconnectProvider.disconnect().then((data:any) => {
+        walletconnectProvider.disconnect().then((data: any) => {
+          console.log(data,'data');
           deactivate();
         })
       } catch (error) {
@@ -288,16 +289,9 @@ export default function App({
   // login with walletconnect
   useEffect(() => {
     if (account) {
-      console.log(account,'acc');
-      
-      // setOneLocalStorage(COOKIES_ADDRESS, account);
       dispatch(setCurrentUser(account));
     }
-    console.log(1);
   }, [account]);
-  console.log(2, account);
-  console.log(3, addressUser);
-
   // change acc, change network
   useEffect(() => {
     (async () => {
@@ -360,14 +354,14 @@ export default function App({
                 :
                 addressUser && addressUser !== '' ?
                   <SDivConnect>
-                    <SAddress>Address:{getShortAddress(addressUser)}</SAddress>
+                    <SAddress>{getShortAddress(addressUser)}</SAddress>
                     {
                       ethCoin && ethCoin > 0 ?
-                        <SCoin>{validationMaxDecimalsNoRound(ethCoin,3)} ETH</SCoin>
+                        <SCoin>{validationMaxDecimalsNoRound(ethCoin, 3)} ETH</SCoin>
                         :
                         <SCoin>0 ETH</SCoin>
                     }
-                    <SDivLogout onClick={handleLogOut}>Logout</SDivLogout>
+                    <SDivLogout onClick={handleLogOut}>{t('Disconnect')}</SDivLogout>
                   </SDivConnect>
                   :
                   <>
@@ -432,7 +426,7 @@ const SDivLogout = styled.div`
   color: #fff;
   cursor:pointer;
   font-size:14px;
-  margin-right:10px;
+  margin-left:10px;
 `
 const SBtnConnect = styled.div`
     font-size: 18px !important;
