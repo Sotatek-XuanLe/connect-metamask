@@ -1,12 +1,13 @@
-
 import { WalletConnectConnector } from "@web3-react/walletconnect-connector";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { AbstractConnector } from '@web3-react/abstract-connector';
 import { providers } from "ethers";
 import Web3 from "web3";
+import { ChainId } from '@sushiswap/sdk';
 import store from "../store/store";
 import { getLocalStorage, setOneLocalStorage } from "./storage";
 import { setChainId } from "../redux/user";
+import { LOCAL_STORAGE_WALLETCONNECT } from "src/const";
 let web3: any;
 const COOKIES_ADDRESS = "address";
 const COOKIES_NETWORK = "network";
@@ -23,7 +24,34 @@ const ETHERIUM_MAINEST = {
 //   name: "Rinkeby",
 // };
 //Create WalletConnect Provider
-const RPC_DEFAULT = "https://bridge.walletconnect.org";
+export const RPC = {
+  [ChainId.MAINNET]: "https://mainnet.infura.io/v3/" + INFURA_ID,
+  [ChainId.ROPSTEN]: 'https://ropsten.infura.io/v3/' + INFURA_ID,
+  [ChainId.RINKEBY]: 'https://rinkeby.infura.io/v3/' + INFURA_ID,
+  [ChainId.GÖRLI]: 'https://goerli.infura.io/v3/' + INFURA_ID,
+  [ChainId.KOVAN]: 'https://kovan.infura.io/v3/' + INFURA_ID,
+  [ChainId.FANTOM]: 'https://rpcapi.fantom.network',
+  [ChainId.FANTOM_TESTNET]: 'https://rpc.testnet.fantom.network',
+  [ChainId.MATIC]: 'https://rpc-mainnet.maticvigil.com',
+  [ChainId.MATIC_TESTNET]: 'https://rpc-mumbai.matic.today',
+  [ChainId.XDAI]: 'https://rpc.xdaichain.com',
+  [ChainId.BSC]: 'https://bsc-dataseed.binance.org/',
+  [ChainId.BSC_TESTNET]: 'https://data-seed-prebsc-2-s3.binance.org:8545',
+  [ChainId.MOONBEAM_TESTNET]: 'https://rpc.testnet.moonbeam.network',
+  [ChainId.AVALANCHE]: 'https://api.avax.network/ext/bc/C/rpc',
+  [ChainId.AVALANCHE_TESTNET]: 'https://api.avax-test.network/ext/bc/C/rpc',
+  [ChainId.HECO]: 'https://http-mainnet.hecochain.com',
+  [ChainId.HECO_TESTNET]: 'https://http-testnet.hecochain.com',
+  [ChainId.HARMONY]: 'https://api.harmony.one',
+  [ChainId.HARMONY_TESTNET]: 'https://api.s0.b.hmny.io',
+  [ChainId.OKEX]: 'https://exchainrpc.okex.org',
+  [ChainId.OKEX_TESTNET]: 'https://exchaintestrpc.okex.org',
+  [ChainId.ARBITRUM]: 'https://arb1.arbitrum.io/rpc',
+  [ChainId.PALM]:
+    'https://palm-mainnet.infura.io/v3/da5fbfafcca14b109e2665290681e267',
+  [ChainId.CELO]: 'https://forno.celo.org',
+};
+
 export const resetWalletConnector = (connector: AbstractConnector) => {
   if (
     connector &&
@@ -35,45 +63,30 @@ export const resetWalletConnector = (connector: AbstractConnector) => {
 }
 export const walletconnectProvider = new WalletConnectProvider({
   infuraId: INFURA_ID,
-  rpc: {
-    1: INFURA_MAIN_NET,
-    4: INFURA_TEST_NET,
-    56: RPC_DEFAULT,
-    3: RPC_DEFAULT,
-    5: RPC_DEFAULT,
-    42: RPC_DEFAULT,
-    250: RPC_DEFAULT,
-    4002: RPC_DEFAULT,
-    137: RPC_DEFAULT,
-    80001: RPC_DEFAULT,
-    100: RPC_DEFAULT,
-    97: RPC_DEFAULT,
-    1287: RPC_DEFAULT,
-    43114: RPC_DEFAULT,
-    43113: RPC_DEFAULT,
-    128: RPC_DEFAULT,
-    256: RPC_DEFAULT,
-    1666600000: RPC_DEFAULT,
-    1666700000: RPC_DEFAULT,
-    66: RPC_DEFAULT,
-    65: RPC_DEFAULT,
-    42161: RPC_DEFAULT,
-    42220: RPC_DEFAULT,
-    11297108109: RPC_DEFAULT,
-    1285: RPC_DEFAULT
-  },
+  rpc: RPC,
   bridge: "https://bridge.walletconnect.org",
   qrcode: true,
+  pollingInterval: 10000
 })
 
 if (Boolean(localStorage.getItem("walletconnect"))) {
+  walletconnectProvider.enable()
+  .then((res) => {
+    
+  })
+  .catch((err) => {
+    console.log("walletconnectProvider err: ", err)
+    walletconnectProvider.disconnect();
+  })
+}
+
+if (Boolean(getLocalStorage(LOCAL_STORAGE_WALLETCONNECT))) {
   walletconnectProvider.enable()
     .then((res: any) => {
       console.log("walletconnectProvider done: ", walletconnectProvider, res)
       walletconnectProvider.on("accountsChanged", (accounts: string[]) => {
         console.log("accountsChanged1: ", accounts);
       });
-
       // Subscribe to chainId change
       walletconnectProvider.on("chainChanged", (chainId: number) => {
         console.log("chainChanged1: ", chainId);
