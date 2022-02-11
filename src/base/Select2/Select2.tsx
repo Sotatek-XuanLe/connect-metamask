@@ -2,15 +2,13 @@ import React, { useRef, useState, useEffect } from "react";
 import styles from "./Select2.module.scss";
 import classnames from "classnames/bind";
 import { KeyboardArrowDownTwoTone } from "@material-ui/icons";
-import Cookies from "js-cookie";
-import EnFlag from "../../assets/img/icon//en.png";
+import EnFlag from "../../assets/img/icon/en.png";
 import KoreaFlag from "../../assets/img/icon//ko.png";
 import VnFlag from "../../assets/img/icon//vn.png";
 import _ from "lodash";
-import styled from "styled-components";
 import useOnClickOutside from "../../helper/useClickOutside";
 import { getLocalStorage } from "../../config/storage";
-
+import styled from "styled-components";
 const cx = classnames.bind(styles);
 
 export const TYPE_FILTER = [
