@@ -15,7 +15,7 @@ import Option from '../../base/Option/Option';
 import { Dialog } from '@material-ui/core';
 import { SUPPORTED_WALLETS } from 'src/config/wallet';
 import { useActiveWeb3React } from 'src/helper/useActiveWeb3';
-
+import CustomDialog from '../../base/Dialog';
 const ConnectWallet = () => {
     let { account, activate, deactivate } = useWeb3React<Web3>();
     const { t } = useTranslation();
@@ -182,9 +182,6 @@ const ConnectWallet = () => {
         console.log('not account,', account);
 
     }, [account]);
-    console.log('account,', account);
-    console.log('addressUser,', addressUser);
-    console.log('isLoading,', isLoading);
     const handleClickModal = () => {
         showPopup();
     }
@@ -260,7 +257,7 @@ const ConnectWallet = () => {
                             </StyledConnectWallet.SBtnConnect>
                         </>
             }
-            <Dialog
+            <CustomDialog
                 open={openPopup}
                 onClose={() => {
                     hidePopup();
@@ -269,14 +266,11 @@ const ConnectWallet = () => {
                 fullWidth
                 maxWidth={'sm'}
             >
-                <div className={'btn-close'} onClick={() => { setModal() }}>
-                    <CloseIcon />
-                </div>
                 <StyledConnectWallet.SBtnConnectPopup onClick={handleConnectMetaMask}>
                     <span>Connect to metamask </span>
                 </StyledConnectWallet.SBtnConnectPopup>
                 <StyledConnectWallet.SBtnConnectPopup>{getOptions}</StyledConnectWallet.SBtnConnectPopup>
-            </Dialog>
+            </CustomDialog>
             {/* End Connect Wallet */}
 
         </>

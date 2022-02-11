@@ -71,13 +71,13 @@ export const walletconnectProvider = new WalletConnectProvider({
 
 if (Boolean(localStorage.getItem("walletconnect"))) {
   walletconnectProvider.enable()
-  .then((res) => {
-    
-  })
-  .catch((err) => {
-    console.log("walletconnectProvider err: ", err)
-    walletconnectProvider.disconnect();
-  })
+    .then((res) => {
+
+    })
+    .catch((err) => {
+      console.log("walletconnectProvider err: ", err)
+      walletconnectProvider.disconnect();
+    })
 }
 
 if (Boolean(getLocalStorage(LOCAL_STORAGE_WALLETCONNECT))) {
@@ -95,11 +95,18 @@ if (Boolean(getLocalStorage(LOCAL_STORAGE_WALLETCONNECT))) {
       walletconnectProvider.on("networkChanged", (chainId: number) => {
         console.log("networkChanged: ", chainId);
       });
+      walletconnectProvider.stop((r: any) => {
+        console.log(r, 'r11111111111111');
+      })
     })
     .catch((err: any) => {
       console.log("walletconnectProvider err: ", err)
       walletconnectProvider.disconnect();
     })
+
+  walletconnectProvider.stop((r: any) => {
+    console.log(r, 'r2222222222222222222');
+  })
 }
 
 export const wcweb3Provider = new providers.Web3Provider(walletconnectProvider);

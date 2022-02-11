@@ -43,3 +43,6 @@
     transform: rotate(360deg);
   }
 }
+
+[data-reactroot] 
+{height: 100% !important; }

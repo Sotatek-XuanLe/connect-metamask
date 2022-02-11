@@ -7,6 +7,9 @@ export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 export const useAddress = () => {
   return useAppSelector((state: RootState) => state.user.address);
 };
+export const useAuthRouter = () => {
+  return useAppSelector((state: RootState) => state.router.router);
+};
 export const useBoolean = (
   initValue: boolean = false
 ): [boolean, () => void, () => void] => {

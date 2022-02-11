@@ -1,23 +1,28 @@
-import styled from "styled-components";
-import i18n from '../i18n/index';
-import { useTranslation } from "react-i18next";
 import {
-    BrowserRouter as Router,
     Switch,
     Route,
-    Link
-  } from "react-router-dom";
-
+    Redirect,
+} from "react-router-dom";
+import NotFound from "../notfound";
 const RouterApp = () => {
-    const { t } = useTranslation();
     return (
         <>
-            <Switch>
-                <Route path="/">
-                </Route>
-                <Route path="/">
-                </Route>
-            </Switch>
+            {
+                < Switch >
+                    {/* default router  */}
+                    <Route exact path="/">
+                        <Redirect path="/" to="/home" />
+                    </Route>
+                    {/* exact router */}
+                    <Route path="/home" exact />
+                    <Route path="/exchange" exact />
+                    <Route path="/pool" exact />
+                    {/* not exact router */}
+                    <Route path="/error" component={NotFound} exact={false} />
+                    <Redirect from="*" to="/error" />
+                </Switch >
+            }
+
         </>
     )
 }
