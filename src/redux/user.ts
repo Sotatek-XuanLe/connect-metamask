@@ -1,5 +1,4 @@
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { getBlancesAll } from "src/helper/contract";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { getLocalStorage, setOneLocalStorage } from "../config/storage";
 import { divDecimalsNumber } from "../helper/bignumber";
 const COOKIES_COIN = "coin";
@@ -19,7 +18,7 @@ const initialState = {
 };
 export const userSlice = createSlice({
   name: "user",
-  initialState,
+  initialState: initialState,
   reducers: {
     setCurrentUser: (state, action: PayloadAction<string>) => {
       state.address = action.payload;
@@ -36,7 +35,7 @@ export const userSlice = createSlice({
         setOneLocalStorage(CHAINID, action.payload);
       }
     },
-  
+
   },
 });
 export const { setCurrentUser, setCoinUser, setChainId } = userSlice.actions;

@@ -44,8 +44,6 @@ const App = () => {
   useEffect(() => {
     checkNotNavBar(location.pathname)
   }, [location.pathname, checkNotNavBar]);
-  console.log(isRouter,'isRouter');
-  
   return (
     <div className="App">
       <header className="App-header">

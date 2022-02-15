@@ -81,7 +81,6 @@ if (Boolean(localStorage.getItem("walletconnect"))) {
 
     })
     .catch((err) => {
-      console.log("walletconnectProvider err: ", err)
       walletconnectProvider.disconnect();
     })
 }
@@ -89,45 +88,35 @@ if (Boolean(localStorage.getItem("walletconnect"))) {
 if (Boolean(getLocalStorage(LOCAL_STORAGE_WALLETCONNECT))) {
   walletconnectProvider.enable()
     .then((res: any) => {
-      console.log("walletconnectProvider done: ", walletconnectProvider, res)
       walletconnectProvider.on("accountsChanged", (accounts: string[]) => {
-        console.log("accountsChanged1: ", accounts);
       });
       // Subscribe to chainId change
       walletconnectProvider.on("chainChanged", (chainId: number) => {
-        console.log("chainChanged1: ", chainId);
       });
 
       walletconnectProvider.on("networkChanged", (chainId: number) => {
-        console.log("networkChanged: ", chainId);
       });
       walletconnectProvider.stop((r: any) => {
-        console.log(r, 'r11111111111111');
       })
     })
     .catch((err: any) => {
-      console.log("walletconnectProvider err: ", err)
       walletconnectProvider.disconnect();
     })
 
   walletconnectProvider.stop((r: any) => {
-    console.log(r, 'r2222222222222222222');
   })
 }
 
 export const wcweb3Provider = new providers.Web3Provider(walletconnectProvider);
 
 walletconnectProvider.on("accountsChanged", (accounts: string[]) => {
-  console.log("accountsChanged1: ", accounts);
 });
 
 // Subscribe to chainId change
 walletconnectProvider.on("chainChanged", (chainId: number) => {
-  console.log("chainChanged1: ", chainId);
 });
 
 walletconnectProvider.on("networkChanged", (chainId: number) => {
-  console.log("networkChanged: ", chainId);
 });
 
 export const walletconnect = new WalletConnectConnector({
@@ -156,7 +145,6 @@ export const getChainId = (): any => {
   }
 };
 export const syncNetwork = (network: any) => {
-  console.log("syncNetwork: ", network)
   setOneLocalStorage(COOKIES_NETWORK, network);
   store && store.dispatch(setChainId(network));
 }

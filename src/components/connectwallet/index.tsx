@@ -61,8 +61,6 @@ const ConnectWallet = () => {
             };
             if (payload.username) {
                 dispatch(setCurrentUser(payload.username));
-                console.log(addressUser,'333');
-                
             };
             hidePopup();
             unsetLoading();
@@ -78,12 +76,8 @@ const ConnectWallet = () => {
                 walletconnect.walletConnectProvider = undefined;
             }
             await activate(walletconnect, undefined, false).then((result: any) => {
-                console.log(result, 'result');
-                console.log(walletconnect, 'walletconnect');
             }).catch((error: any) => {
-                console.log('error', error);
             }).finally(() => {
-                console.log('done');
 
             })
             if (isConnectedByWalletConnect()) {
@@ -98,11 +92,9 @@ const ConnectWallet = () => {
     };
     // Disconect
     const disconnect = useCallback(async (type: any) => {
-        console.log('click logout');
         if (isConnectedByWalletConnect()) {
             try {
                 walletconnectProvider.disconnect().then((data: any) => {
-                    console.log(data, 'data');
                     deactivate();
                 })
             } catch (error) {
@@ -184,8 +176,6 @@ const ConnectWallet = () => {
         if (account) {
             dispatch(setCurrentUser(account));
         }
-        console.log('not account,', account);
-
     }, [account]);
     const handleClickModal = () => {
         showPopup();
@@ -193,8 +183,6 @@ const ConnectWallet = () => {
     useEffect(() => {
         addressUser ? getCoin(addressUser) : dispatch(setCurrentUser(""));
     }, [addressUser, dispatch, getCoin, account]);
-    console.log(addressUser,'ad');
-    
     // change acc, change network
     useEffect(() => {
         (async () => {
@@ -225,7 +213,6 @@ const ConnectWallet = () => {
                             }
                         } else {
                             // Logout current user;
-                            console.log('log out');
                         }
                     }
                 });

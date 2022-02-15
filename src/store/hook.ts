@@ -7,10 +7,14 @@ export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 // export const useLoading = () =>{
 //   return useAppSelector((state: RootState) => state.balances.error ?? false);
 // }
-// export const useBalances = () => {
-//   return useAppSelector((state: RootState) => state.balances?.balances
-//   )
-// }
+export const useBalances = () => {
+  return useAppSelector((state: RootState) => state.wallet.balances.data
+  )
+}
+export const useAddress = () => {
+  return useAppSelector((state: RootState) => state.user.address
+  )
+}
 export const useAuthRouter = () => {
   return useAppSelector((state: RootState) => state.router.router ?? false);
 };

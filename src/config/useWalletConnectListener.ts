@@ -3,6 +3,7 @@ import { useWeb3React, UnsupportedChainIdError } from "@web3-react/core";
 import { useAppDispatch } from "src/store/hook";
 import { setCurrentUser } from "src/redux/user";
 import { getChainId, isConnectedByWalletConnect, syncNetwork, walletconnectProvider } from "./walletConnect";
+import { syncUserWalletBalance } from "src/helper/funcition";
 
 const useWalletConnectListener = () => {
   const { error } = useWeb3React();
@@ -12,15 +13,14 @@ const useWalletConnectListener = () => {
   useEffect(() => {
     if (error) {
       if (error instanceof UnsupportedChainIdError) {
-        console.log("UnsupportedChainIdError");
       }
     }
   }, [error]);
 
   useEffect(() => {
-      console.log("init")
       if (provider.accounts.length > 0) {
-        dispatch(setCurrentUser(provider.accounts[0]))
+        dispatch(setCurrentUser(provider.accounts[0]));
+        // syncUserWalletBalance();
       }
       if (isConnectedByWalletConnect()) {
         syncNetwork(provider.chainId)
@@ -29,13 +29,11 @@ const useWalletConnectListener = () => {
         }
       }
       provider.onConnect(() => {
-        console.log("wallet onConnect")
         getChainId().then((chainID: any) => {
           syncNetwork(chainID)
         })
       })
       provider.on("accountsChanged", (accounts: any) => {
-        console.log("WC accountsChanged", accounts);
         if (accounts.length > 0) {
           dispatch(setCurrentUser(accounts[0]))
         }

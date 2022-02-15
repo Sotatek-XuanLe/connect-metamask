@@ -1,10 +1,11 @@
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import BigNumber from "bignumber.js";
 import { LIST_TOKEN } from 'src/const';
 import { useCallback, useEffect, useState } from 'react';
 // import { useAppDispatch, useBalances, useLoading } from 'src/store/hook';
 import { minusZero, stringFromBigNumber, stringFromBigNumberRate } from 'src/helper/bignumber';
+import { useAddress, useBalances } from 'src/store/hook';
 export interface RawToken {
     address: string;
     chainId: number;
@@ -15,15 +16,16 @@ export interface RawToken {
 }
 interface Props {
     showPopup: any;
+    isLoadding: boolean;
+    hidePopup:any;
 }
 
 const BalancesList = (prop: Props) => {
     const onSelectCurrency = prop;
     const { t } = useTranslation();
-    const lstBalances : any = [];
     const [tokens] = useState<any[]>(LIST_TOKEN);
-    // const loading = useLoading();
-
+    const balances = useBalances();
+    const address = useAddress();
     const renderBalance = (
         balance: string,
         itemDecimals: number,
@@ -45,24 +47,18 @@ const BalancesList = (prop: Props) => {
     };
 
     const renderItem = useCallback((item: RawToken, index) => {
-        console.log(lstBalances, 'lstBalances 1');
-        if (lstBalances && lstBalances.length) {
-            console.log(lstBalances, 'lstBalances 2');
-
-        }
-        // const lpToken: any = lstBalances[item.address];
-        // console.log(lpToken,'lp token');
-        // const lpFormat = stringFromBigNumber(
-        //     new BigNumber(lstBalances),
-        //     item.decimals,
-        //     item.decimals
-        // )
-        // const lpStr: any =
-        //     lpFormat.length > 9 ? lpFormat.slice(0, 9) + "..." : lpFormat;
+        let _balance = balances[item.address];
+        let _balanceStr = stringFromBigNumber(
+            new BigNumber(_balance),
+            item.decimals,
+            item.decimals
+        );
+        let balanceStr =
+            _balanceStr.length > 9 ? _balanceStr.slice(0, 9) + "..." : _balanceStr;
         return (
             <>
                 {
-                    <SBlances key={index} onClick={() => onSelectCurrency}>
+                    <SBlances key={index} onClick={prop.hidePopup}>
                         <SBalancesList>
                             <SBalancesSymbol>
                                 <SBlancesLogo src={item.logoURI}></SBlancesLogo>
@@ -78,8 +74,8 @@ const BalancesList = (prop: Props) => {
 
                             </SBalancesSymbol>
                             <SBalancesLp>
-                                {/* {
-                                    loading && !!loading ?
+                                {
+                                    !!prop.isLoadding ?
                                         <SLoadingSVG
                                             className={"cirle-times"}
                                             viewBox="0 0 24 24"
@@ -94,17 +90,16 @@ const BalancesList = (prop: Props) => {
                                         </SLoadingSVG>
                                         :
                                         <>
-                                            1
+                                        {!address ? 0 : renderBalance(_balance, item.decimals, balanceStr)}
                                         </>
-                                } */}
-                                {renderBalance("1", item.decimals, "11111")}
+                                }
                             </SBalancesLp>
                         </SBalancesList>
                     </SBlances>
                 }
             </>
         )
-    }, [lstBalances, prop.showPopup])
+    }, [balances, prop.showPopup])
     return (
         <>
             <STitleBalances>
@@ -162,8 +157,20 @@ const SBalancesName = styled.div`
 const SBalancesLp = styled.div`
     
 `
+const rotate = keyframes`
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+`;
 const SLoadingSVG = styled.svg`
   width: 15px;
   height: 15px;
+  animation: ${rotate} 2s linear infinite;
+
+
 `;
 export default BalancesList;

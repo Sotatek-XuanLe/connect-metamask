@@ -7,7 +7,7 @@ const store = configureStore({
   reducer: {
     user: userReducer,
     router: routerReducer,
-    balances: balancesReducer
+    wallet: balancesReducer
   },
 });
 

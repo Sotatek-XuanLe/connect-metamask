@@ -23,8 +23,6 @@ const NotFound = () => {
     useEffect(() => {
         componentDidMount();
     }, [loadding]);
-    console.log(loadding, 'loadding');
-
     return (
         <>
             <SDivNotFound>
