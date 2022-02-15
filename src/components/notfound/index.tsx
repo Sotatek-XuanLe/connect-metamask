@@ -1,10 +1,13 @@
 import { useTranslation } from "react-i18next";
 import styled from 'styled-components';
 import { useHistory } from "react-router";
+import Loadding from "src/base/Loadding";
+import { useEffect, useState } from "react";
 
 const NotFound = () => {
     const { t } = useTranslation();
     const history = useHistory();
+    const [loadding, setLoading] = useState(false);
     const goBack = (evt: any) => {
         //  remove and block event in safari
         evt.preventDefault();
@@ -12,12 +15,28 @@ const NotFound = () => {
         // end
         history.push("/");
     };
+    const componentDidMount = () => {
+        setTimeout(()   => {
+            setLoading(true)
+        }, 200);
+    }
+    useEffect(() => {
+        componentDidMount();
+    }, [loadding]);
+    console.log(loadding, 'loadding');
+
     return (
         <>
             <SDivNotFound>
-                <SBtnGoBack onClick={goBack}>
-                    {t('Go back')}
-                </SBtnGoBack>
+                 {
+                    loadding ? <Loadding />
+                        :
+                        <SBtnGoBack onClick={goBack}>
+                            {t('Go back')}
+                        </SBtnGoBack>
+                } 
+
+               
             </SDivNotFound>
 
         </>
@@ -30,11 +49,19 @@ const SDivNotFound = styled.div`
     min-height: 100vh;
 `
 const SBtnGoBack = styled.div`
-    cursor: pointer;
-    padding: 5px 10px;
+cursor: pointer;
     border-radius: 10px;
-    background: #333 !important;
-    color:#fff;
-    font-size:14px;
+    color: #fff;
+    font-size: 14px;
+    width: 100%;
+    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    height: 100%;
+    margin: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
 `
 export default NotFound;

@@ -33,6 +33,7 @@ export const SAddress = styled.div`
     padding: 5px 10px;
     border-radius: 50px;
     font-size: 14px;
+    cursor: pointer;
 `
 export const SCoin = styled.div`
     font-size:14px;

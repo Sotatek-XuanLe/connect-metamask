@@ -1,14 +1,18 @@
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import type { RootState, AppDispatch } from "./store";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 // Use throughout your app instead of plain `useDispatch` and `useSelector`
 export const useAppDispatch = (): any => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
-export const useAddress = () => {
-  return useAppSelector((state: RootState) => state.user.address);
-};
+// export const useLoading = () =>{
+//   return useAppSelector((state: RootState) => state.balances.error ?? false);
+// }
+// export const useBalances = () => {
+//   return useAppSelector((state: RootState) => state.balances?.balances
+//   )
+// }
 export const useAuthRouter = () => {
-  return useAppSelector((state: RootState) => state.router.router);
+  return useAppSelector((state: RootState) => state.router.router ?? false);
 };
 export const useBoolean = (
   initValue: boolean = false
@@ -25,5 +29,5 @@ export const useBoolean = (
   return [value, setTrue, setFalse];
 };
 export const useCoin = () => {
-  return useAppSelector((state: RootState) => parseFloat(state.user.coin));
+  return useAppSelector((state: RootState) => parseFloat(state.user?.coin ?? 0));
 };

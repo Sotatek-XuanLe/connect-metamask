@@ -66,7 +66,13 @@ export const walletconnectProvider = new WalletConnectProvider({
   rpc: RPC,
   bridge: "https://bridge.walletconnect.org",
   qrcode: true,
-  pollingInterval: 10000
+  pollingInterval: 10000,
+  clientMeta: {
+    description: "WalletConnect Developer App",
+    url: "https://walletconnect.org",
+    icons: ["https://s2.coinmarketcap.com/static/img/coins/64x64/6120.png"],
+    name: "WalletConnect",
+  },
 })
 
 if (Boolean(localStorage.getItem("walletconnect"))) {

@@ -3,8 +3,8 @@ const initialState = {
     router: false
 };
 export const routerSlice = createSlice({
-    name: "router",
-    initialState,
+    name: "app/router",
+    initialState : initialState,
     reducers: {
         setAuthRouter: (state, action: PayloadAction<boolean>) => {
             state.router = action.payload;

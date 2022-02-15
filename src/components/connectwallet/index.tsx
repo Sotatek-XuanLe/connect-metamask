@@ -7,7 +7,7 @@ import Web3 from 'web3';
 import { useAppDispatch, useBoolean, useCoin } from "src/store/hook";
 import * as StyledConnectWallet from '../../components/connectwallet/connectWallet.styled';
 import { getLocalStorage, removeLocalStorage, setOneLocalStorage } from "src/config/storage";
-import { LOCAL_STORAGE_ADDRESS, LOCAL_STORAGE_WALLETCONNECT, LOCAL_STORAGE_COIN, ZERO, MAIN_NET_ID } from "src/const";
+import { LOCAL_STORAGE_ADDRESS, LOCAL_STORAGE_WALLETCONNECT, LOCAL_STORAGE_COIN, ZERO, MAIN_NET_ID, LOCAL_STORAGE_CHAINID } from "src/const";
 import { getShortAddress } from "src/helper/funcition";
 import { validationMaxDecimalsNoRound } from "src/helper/bignumber";
 import { setCoinUser, setCurrentUser } from 'src/redux/user';
@@ -16,14 +16,17 @@ import { Dialog } from '@material-ui/core';
 import { SUPPORTED_WALLETS } from 'src/config/wallet';
 import { useActiveWeb3React } from 'src/helper/useActiveWeb3';
 import CustomDialog from '../../base/Dialog';
+import AccountDetail from '../popup/accountDetail';
 const ConnectWallet = () => {
     let { account, activate, deactivate } = useWeb3React<Web3>();
     const { t } = useTranslation();
     const { connector } = useActiveWeb3React();
     const [isLoading, setLoading, unsetLoading] = useBoolean();
     const [openPopup, showPopup, hidePopup] = useBoolean();
+    const [openAccountPopup, showAccountPopup, hideAccountPopup] = useBoolean();
     const ethCoin: any = useCoin();
     const addressUser: any = getLocalStorage(LOCAL_STORAGE_ADDRESS);
+    const txhash : any = getLocalStorage(LOCAL_STORAGE_CHAINID) ?? MAIN_NET_ID;
     const dispatch = useAppDispatch();
     const getSignature = (address: string): any => {
         let web3: any;
@@ -58,6 +61,8 @@ const ConnectWallet = () => {
             };
             if (payload.username) {
                 dispatch(setCurrentUser(payload.username));
+                console.log(addressUser,'333');
+                
             };
             hidePopup();
             unsetLoading();
@@ -185,12 +190,11 @@ const ConnectWallet = () => {
     const handleClickModal = () => {
         showPopup();
     }
-    const setModal = () => {
-        hidePopup()
-    }
     useEffect(() => {
         addressUser ? getCoin(addressUser) : dispatch(setCurrentUser(""));
     }, [addressUser, dispatch, getCoin, account]);
+    console.log(addressUser,'ad');
+    
     // change acc, change network
     useEffect(() => {
         (async () => {
@@ -240,7 +244,7 @@ const ConnectWallet = () => {
                     :
                     addressUser && addressUser !== '' ?
                         <StyledConnectWallet.SDivConnect>
-                            <StyledConnectWallet.SAddress>{getShortAddress(addressUser)}</StyledConnectWallet.SAddress>
+                            <StyledConnectWallet.SAddress onClick={showAccountPopup}>{getShortAddress(addressUser)}</StyledConnectWallet.SAddress>
                             {
                                 ethCoin && ethCoin > 0 ?
                                     <StyledConnectWallet.SCoin>{validationMaxDecimalsNoRound(ethCoin, 4)} ETH</StyledConnectWallet.SCoin>
@@ -271,6 +275,15 @@ const ConnectWallet = () => {
                 </StyledConnectWallet.SBtnConnectPopup>
                 <StyledConnectWallet.SBtnConnectPopup>{getOptions}</StyledConnectWallet.SBtnConnectPopup>
             </CustomDialog>
+            {/*  account detail */}
+            <AccountDetail
+                open={openAccountPopup}
+                onClose={() => {
+                    hideAccountPopup();
+                }}
+                address={addressUser}
+                txhash={txhash}
+            />
             {/* End Connect Wallet */}
 
         </>
