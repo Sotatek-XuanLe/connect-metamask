@@ -1,5 +1,4 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import Cookies from "js-cookie";
 import { getBlancesAll } from "src/helper/contract";
 import { getLocalStorage, setOneLocalStorage } from "../config/storage";
 import { divDecimalsNumber } from "../helper/bignumber";
@@ -18,19 +17,26 @@ const initialState = {
     error: false
   },
 };
-
+const fetchBalancesSMC = createAsyncThunk(
+  'app/getBalances',
+  async (list: Record<string, string | number>[]) => {
+    await getBlancesAll(list)
+  }
+);
 export const userSlice = createSlice({
-  name: "app/user",
-  initialState: initialState,
+  name: "user",
+  initialState,
   reducers: {
     setCurrentUser: (state, action: PayloadAction<string>) => {
-      console.log(state, 'state');
       state.address = action.payload;
       setOneLocalStorage("address", action.payload);
+      console.log(action.payload, ' action.payload address');
     },
     setCoinUser: (state, action: PayloadAction<string>) => {
       state.coin = divDecimalsNumber(action.payload, EIGHTEEN);
+      console.log(action.payload, 'coint');
       const coinFormat: any = divDecimalsNumber(action.payload, EIGHTEEN);
+      console.log(coinFormat, 'coinFormat');
       setOneLocalStorage(COOKIES_COIN, coinFormat);
     },
     setChainId: (state, action: PayloadAction<any>) => {
@@ -39,30 +45,25 @@ export const userSlice = createSlice({
         setOneLocalStorage(CHAINID, action.payload);
       }
     },
+  
   },
-  // extraReducers: {
-  //   [`${fetchBalancesSMC.pending}`]: (state) => {
-  //     state.balances.error = true
-  //   },
-  //   [`${fetchBalancesSMC.rejected}`]: (state, action) => {
-  //     state.balances.data = {}
-  //     state.balances.error = false;
-  //   },
-  //   [`${fetchBalancesSMC.fulfilled}`]: (state, action) => {
-  //     console.log(state, 'state');
-  //     state.balances.data = action.payload;
-  //     state.balances.error = false;
-  //   },
-  // }
-});
-const fetchBalancesSMC = createAsyncThunk(
-  'app/getBalances',
-  async (list: Record<string, string | number>[]) => {
-    await getBlancesAll(list)
+  extraReducers: {
+    [`${fetchBalancesSMC.pending}`]: (state) => {
+      state.balances.error = true
+    },
+    [`${fetchBalancesSMC.rejected}`]: (state, action) => {
+      state.balances.data = {}
+      state.balances.error = false;
+    },
+    [`${fetchBalancesSMC.fulfilled}`]: (state, action) => {
+      console.log(state, 'state');
+      state.balances.data = action.payload;
+      state.balances.error = false;
+    },
   }
-);
+});
 export const { setCurrentUser, setCoinUser, setChainId } = userSlice.actions;
+export const walletAsyncActions = { fetchBalancesSMC };
 const { reducer: userReducer } = userSlice;
 export default userReducer;
-export const walletAsyncActions = { fetchBalancesSMC };
 

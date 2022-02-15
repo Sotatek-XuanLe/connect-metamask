@@ -42,7 +42,7 @@ const SCopy = styled.div`
  
 `
 const SCopyText = styled.div`
-  font-size:14px;
+  font-size:12px;
   display: flex;
   align-items: center;
   cursor: pointer;

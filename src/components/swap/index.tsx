@@ -4,7 +4,7 @@ import BalancesList from "../popup/balances";
 import styled from 'styled-components';
 import { useEffect } from "react";
 import { resetBalances } from "src/redux/balances";
-import { walletAsyncActions } from "src/redux/user";
+// import { walletAsyncActions } from "src/redux/user";
 import { LIST_TOKEN,LOCAL_STORAGE_ADDRESS } from "src/const";
 import { getLocalStorage } from "src/config/storage";
 const Swap = () => {
@@ -14,7 +14,7 @@ const Swap = () => {
     useEffect(() => {
         if (address) {
             console.log(' dispatch balances');
-            dispatch(walletAsyncActions.fetchBalancesSMC(LIST_TOKEN));
+            // dispatch(walletAsyncActions.fetchBalancesSMC(LIST_TOKEN));
         } else {
             console.log('not dispatch balances');
             dispatch(resetBalances());

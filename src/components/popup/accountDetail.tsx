@@ -113,6 +113,7 @@ const SRinkeby = styled.div`
   }
 `
 const SViewTxHash = styled.div`
+    margin-right: 10px;
     a{
         display: flex;
         justify-content: center;
@@ -124,7 +125,7 @@ const SViewTxHash = styled.div`
     svg{
         width:16px !important;
         height:16px !important;
-        margin-left:5px;
+        margin-right:5px;
         display: block;
 
   }
