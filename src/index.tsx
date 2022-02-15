@@ -19,7 +19,6 @@ const Web3ReactRoot = createWeb3ReactRoot(NETWORK_CONTEXT_NAME);
 function Web3ProviderNetwork({ children, getLibrary }: any) {
   return <Web3ReactRoot getLibrary={getLibrary}>{children}</Web3ReactRoot>;
 }
-
 ReactDOM.render(
   <React.StrictMode>
     <I18nextProvider i18n={i18n}>

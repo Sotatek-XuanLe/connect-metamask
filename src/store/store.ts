@@ -1,9 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
-import userReducer from "../redux/user";
+import balancesReducer from "src/redux/balances";
+import routerReducer from "src/redux/router";
+import userReducer from "src/redux/user";
 
 const store = configureStore({
   reducer: {
     user: userReducer,
+    router: routerReducer,
+    wallet: balancesReducer
   },
 });
 

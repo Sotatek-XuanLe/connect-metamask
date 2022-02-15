@@ -53,3 +53,92 @@ export const validationMaxDecimalsNoRound = (
 
   return wholeNumber;
 };
+export const stringFromBigNumber = (
+  number: BigNumber | number,
+  tokenDecimals: number,
+  displayDecimal: number
+) => {
+  if (new BigNumber(number).isNaN()) {
+    return "";
+  }
+
+  let format = {
+    decimalSeparator: ".",
+    groupSeparator: ",",
+    groupSize: 3,
+    secondaryGroupSize: 0,
+    fractionGroupSeparator: " ",
+    fractionGroupSize: 0,
+  };
+
+  let s = new BigNumber(10).pow(tokenDecimals);
+  let _str1 = new BigNumber(number).div(s); //.toFixed(tokenDecimals);
+  let str = new BigNumber(_str1).toFormat(format).toString();
+  let arrStr = str.split(".");
+
+  if (arrStr.length == 0) {
+    return "";
+  }
+
+  if (arrStr.length == 1) {
+    return arrStr[0];
+  }
+
+  let sub = arrStr[1];
+  if (sub.length > displayDecimal) {
+    sub = sub.slice(0, displayDecimal);
+  }
+  if (str && parseFloat(str) < 0.000001) {
+    return "< 0.000001";
+  }
+  return arrStr[0] + "." + sub;
+};
+export const stringFromBigNumberRate = (
+  number: BigNumber | number,
+  tokenDecimals: number,
+  displayDecimal: number
+) => {
+  if (new BigNumber(number).isNaN()) {
+    return "";
+  }
+
+  let format = {
+    decimalSeparator: ".",
+    groupSeparator: ",",
+    groupSize: 3,
+    secondaryGroupSize: 0,
+    fractionGroupSeparator: " ",
+    fractionGroupSize: 0,
+  };
+
+  let s = new BigNumber(10).pow(tokenDecimals);
+  let _str1 = new BigNumber(number).div(s);
+  let str = new BigNumber(_str1).toFormat(format).toString();
+  let arrStr = str.split(".");
+
+  if (arrStr.length == 0) {
+    return "";
+  }
+
+  if (arrStr.length == 1) {
+    return arrStr[0];
+  }
+
+  let sub = arrStr[1];
+  if (sub.length > displayDecimal) {
+    sub = sub.slice(0, displayDecimal);
+  }
+  return arrStr[0] + "." + sub;
+};
+
+export const minusZero = (value: string): string => {
+  if (value.charAt(value.length - 1) === "0") {
+    const newValue = value.slice(0, value.length - 1);
+    return minusZero(newValue);
+  } else {
+    if (value.indexOf(".") === value.length - 1) {
+      return value.slice(0, value.length - 1);
+    }
+    return value;
+  }
+};

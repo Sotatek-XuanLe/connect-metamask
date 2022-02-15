@@ -33,6 +33,7 @@ export const SAddress = styled.div`
     padding: 5px 10px;
     border-radius: 50px;
     font-size: 14px;
+    cursor: pointer;
 `
 export const SCoin = styled.div`
     font-size:14px;
@@ -40,7 +41,7 @@ export const SCoin = styled.div`
 `
 export const SDivLogout = styled.div`
   background: #262a47 !important;
-  padding: 10px;
+  padding: 5px 10px;
   border-radius: 50px;
   font-weight: 400;
   color: #fff;
@@ -52,7 +53,7 @@ export const SBtnConnect = styled.div`
     font-size: 18px !important;
     line-height: 27px;
     color: #fff !important;
-    padding: 10px;
+    padding: 5px;
     border-radius: 50px !important;
     background-color: rgba(76,255,163,0.2);
     width: 190px;
