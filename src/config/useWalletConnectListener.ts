@@ -29,11 +29,14 @@ const useWalletConnectListener = () => {
         }
       }
       provider.onConnect(() => {
+        console.log('onConnect');
+        
         getChainId().then((chainID: any) => {
           syncNetwork(chainID)
         })
       })
       provider.on("accountsChanged", (accounts: any) => {
+        console.log('accountsChanged');
         if (accounts.length > 0) {
           dispatch(setCurrentUser(accounts[0]))
         }

@@ -1,22 +1,23 @@
-import React, { useMemo, useCallback, useEffect } from 'react';
+import { useMemo, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from "react-i18next";
-import CloseIcon from '@material-ui/icons/Close';
 import web3, { isConnectedByWalletConnect, walletconnect, walletconnectProvider } from '../../config/walletConnect';
 import { useWeb3React } from '@web3-react/core';
 import Web3 from 'web3';
 import { useAppDispatch, useBoolean, useCoin } from "src/store/hook";
 import * as StyledConnectWallet from '../../components/connectwallet/connectWallet.styled';
 import { getLocalStorage, removeLocalStorage, setOneLocalStorage } from "src/config/storage";
-import { LOCAL_STORAGE_ADDRESS, LOCAL_STORAGE_WALLETCONNECT, LOCAL_STORAGE_COIN, ZERO, MAIN_NET_ID, LOCAL_STORAGE_CHAINID } from "src/const";
-import { getShortAddress } from "src/helper/funcition";
+import { LOCAL_STORAGE_ADDRESS, LOCAL_STORAGE_WALLETCONNECT, LOCAL_STORAGE_COIN, ZERO, MAIN_NET_ID, LOCAL_STORAGE_CHAINID, METAMASK_URL } from "src/const";
+import { getShortAddress, syncUserWalletBalance } from "src/helper/funcition";
 import { validationMaxDecimalsNoRound } from "src/helper/bignumber";
 import { setCoinUser, setCurrentUser } from 'src/redux/user';
 import Option from '../../base/Option/Option';
-import { Dialog } from '@material-ui/core';
 import { SUPPORTED_WALLETS } from 'src/config/wallet';
 import { useActiveWeb3React } from 'src/helper/useActiveWeb3';
 import CustomDialog from '../../base/Dialog';
 import AccountDetail from '../popup/accountDetail';
+import { ERROR_MESSAGE } from 'src/const/error';
+import _ from 'lodash';
+import { setBalances } from 'src/redux/balances';
 const ConnectWallet = () => {
     let { account, activate, deactivate } = useWeb3React<Web3>();
     const { t } = useTranslation();
@@ -24,9 +25,11 @@ const ConnectWallet = () => {
     const [isLoading, setLoading, unsetLoading] = useBoolean();
     const [openPopup, showPopup, hidePopup] = useBoolean();
     const [openAccountPopup, showAccountPopup, hideAccountPopup] = useBoolean();
+    const [isMetaMask, setIsMetaMask, setIsNotMetaMask] = useBoolean();
+    const [textErr, setTextError] = useState<string>("");
     const ethCoin: any = useCoin();
     const addressUser: any = getLocalStorage(LOCAL_STORAGE_ADDRESS);
-    const txhash : any = getLocalStorage(LOCAL_STORAGE_CHAINID) ?? MAIN_NET_ID;
+    const txhash: any = getLocalStorage(LOCAL_STORAGE_CHAINID) ?? MAIN_NET_ID;
     const dispatch = useAppDispatch();
     const getSignature = (address: string): any => {
         let web3: any;
@@ -42,32 +45,69 @@ const ConnectWallet = () => {
             });
         }
     };
+    const checkIsMetaMaskInstalled = useCallback(async () => {
+        const { ethereum } = window;
+        const isMetaMaskInstalled = !!(ethereum && ethereum.isMetaMask);
+
+        if (isMetaMaskInstalled) {
+            setIsMetaMask();
+        } else {
+            setIsNotMetaMask();
+        }
+    }, [setIsMetaMask, setIsNotMetaMask]);
+    console.log(isMetaMask, 'isMetaMask');
+    // Check if user's browser had Metamask installed
+    useEffect(() => {
+        checkIsMetaMaskInstalled();
+    }, [checkIsMetaMaskInstalled, openPopup]);
     // connect metamask
-    const handleConnectMetaMask = async () => {
+    const handleConnectMetaMask = useCallback(async () => {
         if (!window.ethereum) {
             return;
         }
-        setLoading();
+        console.log(1);
+        setTextError("");
         window.web3 = new Web3(window.ethereum);
         try {
             const accounts = await window.ethereum.request({
                 method: "eth_requestAccounts",
             });
             const signature = (await getSignature(accounts[0])) as string;
+            setLoading();
             const payload = {
                 username: accounts[0],
                 password: signature,
                 message: `Sign this message to login with address ${accounts[0]}`,
             };
             if (payload.username) {
+                console.log('metamask logined');
+                setTextError("");
                 dispatch(setCurrentUser(payload.username));
             };
             hidePopup();
             unsetLoading();
         } catch (err: any) {
-            unsetLoading();
+            setLoading();
+            const _indexErr = _.findIndex(ERROR_MESSAGE, (item: any) => {
+                return item.code === err.code
+            })
+            console.log(ERROR_MESSAGE[_indexErr].message, 'message');
+            if (_indexErr > -1) {
+                unsetLoading();
+                setTextError(ERROR_MESSAGE[_indexErr].message)
+            } else {
+                setTextError("");
+                unsetLoading();
+
+
+            }
         }
-    };
+    }, [
+        checkIsMetaMaskInstalled,
+        dispatch,
+        setLoading,
+        unsetLoading
+    ])
 
     // CONNECT WALLET QR MOBILE
     const connect = async () => {
@@ -113,7 +153,7 @@ const ConnectWallet = () => {
         removeLocalStorage(LOCAL_STORAGE_COIN);
         dispatch(setCoinUser(ZERO));
         unsetLoading();
-
+        setTextError("");
     }, [addressUser]);
     // Get WalletConnect supported option
     const getOptions = useMemo(() => {
@@ -171,10 +211,77 @@ const ConnectWallet = () => {
         },
         [dispatch]
     );
+    // check login logout change account change network metamask browser
+    useEffect(() => {
+        (async () => {
+            if (window.ethereum) {
+                // Handle account change
+                window.ethereum.on("accountsChanged", async (accounts: any) => {
+                    // check change account get eth coin
+                    console.log("accountsChanged 111");
+                    if (isConnectedByWalletConnect()) {
+                        return;
+                    }
+
+                    if (accounts.length > 0) {
+                        setOneLocalStorage(LOCAL_STORAGE_ADDRESS, accounts);
+                        if (accounts) {
+                            getCoin(accounts[0]);
+                        }
+
+                        dispatch(setCurrentUser(accounts[0]));
+                        syncUserWalletBalance();
+                    } else {
+                        dispatch(setCurrentUser(''));
+                        removeLocalStorage(LOCAL_STORAGE_ADDRESS);
+                        removeLocalStorage(LOCAL_STORAGE_WALLETCONNECT);
+                        removeLocalStorage(LOCAL_STORAGE_COIN);
+                        dispatch(setCoinUser(ZERO));
+                        unsetLoading();
+                    }
+                });
+
+                // Handle network change
+                window.ethereum.on("chainChanged", async (idNetWork_hex: any) => {
+                    let idNetWork = parseInt(idNetWork_hex, 16)
+                    if (isConnectedByWalletConnect()) {
+                        return;
+                    }
+
+                    let address = getAddressFromLocalStorage();
+                    if (!address) {
+                        return
+                    }
+
+                    if (idNetWork) {
+                        // reInitWeb3();
+
+                        if (idNetWork === parseInt(MAIN_NET_ID)) {
+                            if (address) {
+                                getCoin(address);
+                                setOneLocalStorage(LOCAL_STORAGE_ADDRESS, address);
+                                syncUserWalletBalance();
+                            } else {
+                                dispatch(setBalances({}));
+                            }
+                        } else {
+                            // Logout current user;
+                            dispatch(setBalances({}));
+                        }
+                    }
+                });
+
+            }
+
+
+        })();
+    }, []);
+
     // login with walletconnect
     useEffect(() => {
         if (account) {
             dispatch(setCurrentUser(account));
+            setTextError("");
         }
     }, [account]);
     const handleClickModal = () => {
@@ -257,9 +364,26 @@ const ConnectWallet = () => {
                 fullWidth
                 maxWidth={'sm'}
             >
-                <StyledConnectWallet.SBtnConnectPopup onClick={handleConnectMetaMask}>
-                    <span>Connect to metamask </span>
-                </StyledConnectWallet.SBtnConnectPopup>
+                {
+                    isMetaMask ?
+                        <StyledConnectWallet.SBtnConnectPopup onClick={handleConnectMetaMask}>
+                            {isLoading ? <>...</>
+                                :
+                                <>
+                                    {textErr ?
+                                        <span>{textErr}</span>
+                                        :
+                                        <span>Connect to metamask </span>
+                                    }
+                                </>
+                            }
+                        </StyledConnectWallet.SBtnConnectPopup>
+                        :
+                        <StyledConnectWallet.SBtnConnectPopup>
+                            <a href={METAMASK_URL}>Install Metamask </a>
+                        </StyledConnectWallet.SBtnConnectPopup>
+                }
+
                 <StyledConnectWallet.SBtnConnectPopup>{getOptions}</StyledConnectWallet.SBtnConnectPopup>
             </CustomDialog>
             {/*  account detail */}

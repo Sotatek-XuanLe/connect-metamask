@@ -24,6 +24,7 @@ export const tokenLogoUris = {
     usdt: "https://s3.us-west-2.amazonaws.com/anw.finance/usdt-square.jpg",
     sotaLogo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnepPDUJI8inAIrqvNH8XTridwGOn4uIZMlShv_3adecli-seML7ZV0W7sxmxcNibiJzA&usqp=CAU"
 };
+export const METAMASK_URL = 'https://metamask.io/';
 export const URL_APP = [
     {
         to: "/home",
