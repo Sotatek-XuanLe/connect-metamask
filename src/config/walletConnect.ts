@@ -145,7 +145,7 @@ export const getChainId = (): any => {
   }
 };
 export const syncNetwork = (network: any) => {
-  setOneLocalStorage(COOKIES_NETWORK, network);
+setOneLocalStorage(COOKIES_NETWORK, network);
   store && store.dispatch(setChainId(network));
 }
 export const reInitWeb3 = () => {

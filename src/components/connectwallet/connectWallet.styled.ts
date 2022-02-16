@@ -87,4 +87,9 @@ export const SBtnConnectPopup = styled.div`
     -webkit-justify-content: space-between;
     -ms-flex-pack: justify;
     justify-content: space-between;
+    a{
+      color: #ffffff;
+      text-decoration:none;
+      display: block;
+    }
 `
